@@ -10,6 +10,9 @@ print("Snep Library - Okkg ... LOADED!")
 local json = require("json")  -- json.lua by rxi (MIT)
 local UEHelpers = require("UEHelpers")
 
+
+local console = UEHelpers.GetKismetSystemLibrary(false)
+
 -- Save file related functions
 
 function GetSaveFileLocation()
@@ -21,7 +24,7 @@ function GetSaveFileLocation()
 end
 
 ---@param saveGame UVeinSaveGame -- Can Be Nil
-function CheckSave(saveGame)
+function CheckForSave(saveGame)
     if saveGame == nil then
         ---@class UVeinSaveGame
         local VeinSaveGame = FindFirstOf("VeinSaveGame")
@@ -31,7 +34,7 @@ function CheckSave(saveGame)
 
             if tostring(name) == nil or tostring(name) == "" then print("No save") return end
 
-            if SaveExists(tostring(name)) then
+            if DoesSaveExist(tostring(name)) then
                 ReadSaveData(tostring(name))
                 print("Reading data.")
             else
@@ -45,7 +48,7 @@ function CheckSave(saveGame)
 
         local name = save.SaveName:ToString()
 
-        if SaveExists(tostring(name)) then
+        if DoesSaveExist(tostring(name)) then
             ReadSaveData(tostring(name))
             print("Reading data.")
         else
@@ -56,13 +59,14 @@ function CheckSave(saveGame)
 end
 
 ---@param name string
-function SaveExists(name)
+function DoesSaveExist(name)
     local filename = name .. ".txt"
     local file = io.open(GetSaveFileLocation() .. filename,'r')
     if file~=nil then io.close(file) return true else return false end
 end
 
 ---@param name string
+---@---@param savefiledata table
 function SaveData(name, savefiledata)
     local filename = name .. ".txt"
     local file = assert(io.open(GetSaveFileLocation() .. filename,'w'))
@@ -79,9 +83,10 @@ function ReadSaveData(name)
         file:close()
         return savefiledata
     else
-        print("error:", err)
+        print("Error! ", err)
     end
 end
+
 
 -- Time functions
 
@@ -131,6 +136,96 @@ function GetTime()
         print("Couldnt get time!")
     end
 end
+
+-- Sandbox settings (oh god)
+
+---@param value float
+function SetZombieSpawnMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SpawnCapMultiplierZombie ".. value)
+end
+
+function GetZombieSpawnMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SpawnCapMultiplierZombie")
+    return val
+end
+
+---@param value float
+function SetZombieSightMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SightMultiplier ".. value)
+end
+
+function GetZombieSightMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SightMultiplier")
+    return val
+end
+
+---@param value float
+function SetZombieHearingMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.HearingMultiplier ".. value)
+end
+
+function GetZombieHearingMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.HearingMultiplier")
+    return val
+end
+
+---@param value float
+function SetZombieSpeedMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SpeedMultiplier ".. value)
+end
+
+function GetZombieSpeedMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SpeedMultiplier")
+    return val
+end
+
+---@param value float
+function SetZombieDamageMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.DamageMultiplier ".. value)
+end
+
+function GetZombieDamageMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.DamageMultiplier")
+    return val
+end
+
+
+-- Horde Functions
+
+---@param character AVeinPlayerCharacter
+---@param type EHordeType
+function TriggerHorde(character, type)
+
+    if not character:IsValid() then return print("Nil player character.") end
+
+    ---@class UAISpawnerSubsystem
+    local AISpawnerSubsystem = FindFirstOf("AISpawnerSubsystem")
+
+    if not AISpawnerSubsystem:IsValid() then
+        print("Cant find AISpawnerSubsystem.")
+        return
+    end
+
+    AISpawnerSubsystem:TriggerHorde(character, type)
+end
+
+
+
+-- Misc Functions
+
+---@param text string
+function SendServerMessage(text)
+    ---@class AVeinGameStateBase
+    local VeinGameStateBase = FindFirstOf("VeinGameStateBase")
+
+    if not VeinGameStateBase:IsValid() then
+        print("Cant find VeinGameStateBase.")
+        return
+    end
+
+    VeinGameStateBase:BroadcastServerMessage(text)
+end
+
 
 
 function IsInMainMenu()
