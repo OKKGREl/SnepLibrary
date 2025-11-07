@@ -26,7 +26,8 @@ function GetSaveFileLocation()
 end
 
 ---@param saveGame UVeinSaveGame -- Can Be Nil
-function CheckForSave(saveGame)
+---@param savefiledata table
+function CheckForSave(saveGame, savefiledata)
     if saveGame == nil then
         ---@class UVeinSaveGame
         local VeinSaveGame = FindFirstOf("VeinSaveGame")
@@ -40,7 +41,7 @@ function CheckForSave(saveGame)
                 ReadSaveData(tostring(name))
                 print("Reading data.")
             else
-                SaveData(tostring(name))
+                SaveData(tostring(name), savefiledata)
                 print("Saving data.")
             end
         end
@@ -54,7 +55,7 @@ function CheckForSave(saveGame)
             ReadSaveData(tostring(name))
             print("Reading data.")
         else
-            SaveData(tostring(name))
+            SaveData(tostring(name), savefiledata)
             print("Saving data.")
         end
     end
@@ -68,7 +69,7 @@ function DoesSaveExist(name)
 end
 
 ---@param name string
----@---@param savefiledata table
+---@param savefiledata table
 function SaveData(name, savefiledata)
     local filename = name .. ".txt"
     local file = assert(io.open(GetSaveFileLocation() .. filename,'w'))
