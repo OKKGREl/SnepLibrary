@@ -15,6 +15,8 @@ local console = UEHelpers.GetKismetSystemLibrary(false)
 
 -- Save file related functions
 
+
+-- Create a SaveFiles folder in your mods path.
 function GetSaveFileLocation()
     local info = debug.getinfo(1, "S")
     local script_path = info.source:gsub("^@", "")
@@ -151,41 +153,51 @@ end
 
 ---@param value float
 function SetZombieSightMultiplier(value)
-    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SightMultiplier ".. value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.SightMultiplier ".. value)
 end
 
 function GetZombieSightMultiplier()
-    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SightMultiplier")
+    local val = console:GetConsoleVariableFloatValue("vein.Zombies.SightMultiplier")
     return val
 end
 
 ---@param value float
 function SetZombieHearingMultiplier(value)
-    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.HearingMultiplier ".. value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.HearingMultiplier ".. value)
 end
 
 function GetZombieHearingMultiplier()
-    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.HearingMultiplier")
+    local val = console:GetConsoleVariableFloatValue("vein.Zombies.HearingMultiplier")
     return val
 end
 
 ---@param value float
 function SetZombieSpeedMultiplier(value)
-    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SpeedMultiplier ".. value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.SpeedMultiplier ".. value)
 end
 
 function GetZombieSpeedMultiplier()
-    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SpeedMultiplier")
+    local val = console:GetConsoleVariableFloatValue("vein.Zombies.SpeedMultiplier")
     return val
 end
 
 ---@param value float
 function SetZombieDamageMultiplier(value)
-    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.DamageMultiplier ".. value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.DamageMultiplier ".. value)
 end
 
 function GetZombieDamageMultiplier()
-    local val = console:GetConsoleVariableFloatValue("vein.AISpawner.DamageMultiplier")
+    local val = console:GetConsoleVariableFloatValue("vein.Zombies.DamageMultiplier")
+    return val
+end
+
+---@param value float
+function SetXPMultiplier(value)
+    local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Stats.XPMultiplier ".. value)
+end
+
+function GetXPMultiplier()
+    local val = console:GetConsoleVariableFloatValue("vein.Stats.XPMultiplier")
     return val
 end
 
