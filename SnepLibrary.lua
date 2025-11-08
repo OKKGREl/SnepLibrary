@@ -1,5 +1,11 @@
 print("Snep Library - Okkg ... LOADED!")
 
+
+local SnepLibrary = {}
+
+local Version = 3
+
+
 --[[
     Snep Library - Okkg
     Copyright (c) 2025 okkg
@@ -13,11 +19,34 @@ local UEHelpers = require("UEHelpers")
 
 local console = UEHelpers.GetKismetSystemLibrary(false)
 
+
+-- Custom Occupations
+---@param Occupation UOccupationData
+---@param StatsDescription FString
+---@param LoadoutTextBlock UTextBlock
+function SnepLibrary.AddCustomOccupation(Occupation, StatsDescription, LoadoutTextBlock)
+
+    ---@class UCharacterCreationWidget
+    local CharacterCreationBP = FindFirstOf("WBP_CharacterCreation_C")
+
+    if CharacterCreationBP:IsValid() and Occupation then
+        
+        ---@class UCharacterCreationOccWidget
+        local item = CharacterCreationBP.OccupationList.GetItemAt(CharacterCreationBP.OccupationList, 28)
+        item.Occupation = Occupation
+
+        CharacterCreationBP.OccupationList:AddItem(item)
+        print("Added Item!")
+    else
+        print("Couldnt get CharacterCreationBP!")
+    end
+end
+
+
 -- Save file related functions
 
-
 -- Create a SaveFiles folder in your mods path.
-function GetSaveFileLocation()
+function SnepLibrary.GetSaveFileLocation()
     local info = debug.getinfo(1, "S")
     local script_path = info.source:gsub("^@", "")
     local script_dir = script_path:match("(.*[\\/])")
@@ -27,7 +56,7 @@ end
 
 ---@param saveGame UVeinSaveGame -- Can Be Nil
 ---@param savefiledata table
-function CheckForSave(saveGame, savefiledata)
+function SnepLibrary.CheckForSave(saveGame, savefiledata)
     if saveGame == nil then
         ---@class UVeinSaveGame
         local VeinSaveGame = FindFirstOf("VeinSaveGame")
@@ -62,7 +91,7 @@ function CheckForSave(saveGame, savefiledata)
 end
 
 ---@param name string
-function DoesSaveExist(name)
+function SnepLibrary.DoesSaveExist(name)
     local filename = name .. ".txt"
     local file = io.open(GetSaveFileLocation() .. filename,'r')
     if file~=nil then io.close(file) return true else return false end
@@ -70,7 +99,7 @@ end
 
 ---@param name string
 ---@param savefiledata table
-function SaveData(name, savefiledata)
+function SnepLibrary.SaveData(name, savefiledata)
     local filename = name .. ".txt"
     local file = assert(io.open(GetSaveFileLocation() .. filename,'w'))
     file:write(json.encode(savefiledata))
@@ -78,7 +107,7 @@ function SaveData(name, savefiledata)
 end
 
 ---@param name string
-function ReadSaveData(name)
+function SnepLibrary.ReadSaveData(name)
     local filename = name .. ".txt"
     local file, err = io.open(GetSaveFileLocation() .. filename,'r')
     if file then
@@ -94,7 +123,7 @@ end
 -- Time functions
 
 ---@param text string
-function PMtoMilitaryTime(text)
+function SnepLibrary.PMtoMilitaryTime(text)
     local hour, min, period = text:match("(%d+):(%d+)%s*(%a+)")
 
     hour = tonumber(hour)
@@ -110,7 +139,7 @@ function PMtoMilitaryTime(text)
 end
 
 ---@param text string
-function PMToMinutes(text)
+function SnepLibrary.PMToMinutes(text)
     local hour, min, period = text:match("(%d+):(%d+)%s*(%a+)")
 
     hour = tonumber(hour)
@@ -125,7 +154,7 @@ function PMToMinutes(text)
     return tonumber(hour) * 60 + tonumber(min)
 end
 
-function GetTime()
+function SnepLibrary.GetTime()
     -- ---@class UTimeComponent
     --local timecomp = FindFirstOf("TimeComponent")
 
@@ -143,61 +172,61 @@ end
 -- Sandbox settings (oh god)
 
 ---@param value float
-function SetZombieSpawnMultiplier(value)
+function SnepLibrary.SetZombieSpawnMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.AISpawner.SpawnCapMultiplierZombie ".. value)
 end
 
-function GetZombieSpawnMultiplier()
+function SnepLibrary.GetZombieSpawnMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.AISpawner.SpawnCapMultiplierZombie")
     return val
 end
 
 ---@param value float
-function SetZombieSightMultiplier(value)
+function SnepLibrary.SetZombieSightMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.SightMultiplier ".. value)
 end
 
-function GetZombieSightMultiplier()
+function SnepLibrary.GetZombieSightMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.Zombies.SightMultiplier")
     return val
 end
 
 ---@param value float
-function SetZombieHearingMultiplier(value)
+function SnepLibrary.SetZombieHearingMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.HearingMultiplier ".. value)
 end
 
-function GetZombieHearingMultiplier()
+function SnepLibrary.GetZombieHearingMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.Zombies.HearingMultiplier")
     return val
 end
 
 ---@param value float
-function SetZombieSpeedMultiplier(value)
+function SnepLibrary.SetZombieSpeedMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.SpeedMultiplier ".. value)
 end
 
-function GetZombieSpeedMultiplier()
+function SnepLibrary.GetZombieSpeedMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.Zombies.SpeedMultiplier")
     return val
 end
 
 ---@param value float
-function SetZombieDamageMultiplier(value)
+function SnepLibrary.SetZombieDamageMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Zombies.DamageMultiplier ".. value)
 end
 
-function GetZombieDamageMultiplier()
+function SnepLibrary.GetZombieDamageMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.Zombies.DamageMultiplier")
     return val
 end
 
 ---@param value float
-function SetXPMultiplier(value)
+function SnepLibrary.SetXPMultiplier(value)
     local val = console:ExecuteConsoleCommand(UEHelpers.GetWorld(), "vein.Stats.XPMultiplier ".. value)
 end
 
-function GetXPMultiplier()
+function SnepLibrary.GetXPMultiplier()
     local val = console:GetConsoleVariableFloatValue("vein.Stats.XPMultiplier")
     return val
 end
@@ -207,7 +236,7 @@ end
 
 ---@param character AVeinPlayerCharacter
 ---@param type EHordeType
-function TriggerHorde(character, type)
+function SnepLibrary.TriggerHorde(character, type)
 
     if not character:IsValid() then return print("Nil player character.") end
 
@@ -227,7 +256,7 @@ end
 -- Misc Functions
 
 ---@param text string
-function SendServerMessage(text)
+function SnepLibrary.SendServerMessage(text)
     ---@class AVeinGameStateBase
     local VeinGameStateBase = FindFirstOf("VeinGameStateBase")
 
@@ -241,7 +270,7 @@ end
 
 
 
-function IsInMainMenu()
+function SnepLibrary.IsInMainMenu()
     local Player = UEHelpers.GetPlayerController()
 
     if not Player:IsValid() then
@@ -255,3 +284,5 @@ function IsInMainMenu()
 
     return false
 end
+
+return SnepLibrary
