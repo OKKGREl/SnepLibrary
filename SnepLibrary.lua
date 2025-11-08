@@ -5,6 +5,9 @@ local SnepLibrary = {}
 
 local Version = 3
 
+local OccupationSlots = 0
+local HairSlots = 0
+
 
 --[[
     Snep Library - Okkg
@@ -20,34 +23,110 @@ local UEHelpers = require("UEHelpers")
 local console = UEHelpers.GetKismetSystemLibrary(false)
 
 
+--Custom game settings for zombies
+---@return UGameplaySetting
+function SnepLibrary.AddCustomGameZombieOption()
+
+    ---@class UMainMenuWidget
+    local MainMenu = FindFirstOf("WBP_MainMenu_C")
+
+    ---@class UGameplaySetting
+    local item = nil
+
+    if MainMenu:IsValid() then
+
+        ---@class UGameplaySetting
+        item = MainMenu.ZombieOptions.Slots[4]
+        if item then
+            print(item)
+            item.Label = FText("Ypeeee")
+            MainMenu.ZombieOptions.Slots[20] = item
+            print("Added Item!")
+            return item
+        else
+            print("Item is nil!")
+            return item
+        end
+    else
+        print("Couldnt get CharacterCreationBP!")
+        return item
+    end
+end
+
 -- Custom Occupations
----@param Occupation UOccupationData
----@param StatsDescription FString
----@param LoadoutTextBlock UTextBlock
-function SnepLibrary.AddCustomOccupation(Occupation, StatsDescription, LoadoutTextBlock)
+---@return UOccupationData
+function SnepLibrary.AddCustomOccupation()
 
     ---@class UCharacterCreationWidget
     local CharacterCreationBP = FindFirstOf("WBP_CharacterCreation_C")
 
-    if CharacterCreationBP:IsValid() and Occupation then
-        
-        ---@class UCharacterCreationOccWidget
-        local item = CharacterCreationBP.OccupationList.GetItemAt(CharacterCreationBP.OccupationList, 28)
-        item.Occupation = Occupation
+    ---@class UOccupationData
+    local item = nil
 
-        CharacterCreationBP.OccupationList:AddItem(item)
-        print("Added Item!")
+    if CharacterCreationBP:IsValid() then
+        ---@class UOccupationData   
+        local tempitem = CharacterCreationBP.OccupationList.Slots[4]
+
+        ---@class UOccupationData
+        item = StaticConstructObject(StaticFindObject("/Script/Vein.OccupationData.Class"), CharacterCreationBP)
+
+        item.Occupation = tempitem.Occupation
+
+        if item then
+            print(item)
+            OccupationSlots = OccupationSlots + 1
+            -- starts at 29
+            CharacterCreationBP.OccupationList.ListItems[29 + OccupationSlots] = item
+            print("Added Item!")
+            return item
+        else
+            print("Item is nil!")
+            return item
+        end
     else
         print("Couldnt get CharacterCreationBP!")
+        return item
     end
 end
+
+-- Custom Hair
+---@return UHairData
+function SnepLibrary.AddCustomHair()
+    ---@class UCharacterCreationWidget
+    local CharacterCreationBP = FindFirstOf("WBP_CharacterCreation_C")
+
+    ---@class UHairData
+    local hair = nil
+
+    if CharacterCreationBP:IsValid() then
+
+        ---@class UHairData
+        hair = CharacterCreationBP.Hairs.Slots[1]
+
+        if hair then
+            print(hair)
+
+            HairSlots = HairSlots + 1
+            CharacterCreationBP.Hairs.Slots[21 + HairSlots] = item
+            print("Added Item!")
+
+            return hair
+        else
+            return hair
+        end
+    else
+        print("Couldnt get CharacterCreationBP!")
+        return hair
+    end
+end
+
 
 
 -- Save file related functions
 
 -- Create a SaveFiles folder in your mods path.
-function SnepLibrary.GetSaveFileLocation()
-    local info = debug.getinfo(1, "S")
+---@param info debuginfo
+function SnepLibrary.GetSaveFileLocation(info)
     local script_path = info.source:gsub("^@", "")
     local script_dir = script_path:match("(.*[\\/])")
     script_dir = script_dir .. "SaveFiles\\"
@@ -56,7 +135,8 @@ end
 
 ---@param saveGame UVeinSaveGame -- Can Be Nil
 ---@param savefiledata table
-function SnepLibrary.CheckForSave(saveGame, savefiledata)
+---@param info debuginfo
+function SnepLibrary.CheckForSave(saveGame, savefiledata, info)
     if saveGame == nil then
         ---@class UVeinSaveGame
         local VeinSaveGame = FindFirstOf("VeinSaveGame")
@@ -66,11 +146,11 @@ function SnepLibrary.CheckForSave(saveGame, savefiledata)
 
             if tostring(name) == nil or tostring(name) == "" then print("No save") return end
 
-            if DoesSaveExist(tostring(name)) then
-                ReadSaveData(tostring(name))
+            if SnepLibrary.DoesSaveExist(tostring(name),info) then
+                SnepLibrary.ReadSaveData(tostring(name),info)
                 print("Reading data.")
             else
-                SaveData(tostring(name), savefiledata)
+                SnepLibrary.SaveData(tostring(name), savefiledata,info)
                 print("Saving data.")
             end
         end
@@ -80,36 +160,39 @@ function SnepLibrary.CheckForSave(saveGame, savefiledata)
 
         local name = save.SaveName:ToString()
 
-        if DoesSaveExist(tostring(name)) then
-            ReadSaveData(tostring(name))
+        if SnepLibrary.DoesSaveExist(tostring(name),info) then
+            SnepLibrary.ReadSaveData(tostring(name),info)
             print("Reading data.")
         else
-            SaveData(tostring(name), savefiledata)
+            SnepLibrary.SaveData(tostring(name), savefiledata,info)
             print("Saving data.")
         end
     end
 end
 
 ---@param name string
-function SnepLibrary.DoesSaveExist(name)
+---@param info debuginfo
+function SnepLibrary.DoesSaveExist(name, info)
     local filename = name .. ".txt"
-    local file = io.open(GetSaveFileLocation() .. filename,'r')
+    local file = io.open(SnepLibrary.GetSaveFileLocation(info) .. filename,'r')
     if file~=nil then io.close(file) return true else return false end
 end
 
 ---@param name string
 ---@param savefiledata table
-function SnepLibrary.SaveData(name, savefiledata)
+---@param info debuginfo
+function SnepLibrary.SaveData(name, savefiledata, info)
     local filename = name .. ".txt"
-    local file = assert(io.open(GetSaveFileLocation() .. filename,'w'))
+    local file = assert(io.open(SnepLibrary.GetSaveFileLocation(info) .. filename,'w'))
     file:write(json.encode(savefiledata))
     file:close()
 end
 
 ---@param name string
-function SnepLibrary.ReadSaveData(name)
+---@param info debuginfo
+function SnepLibrary.ReadSaveData(name, info)
     local filename = name .. ".txt"
-    local file, err = io.open(GetSaveFileLocation() .. filename,'r')
+    local file, err = io.open(SnepLibrary.GetSaveFileLocation(info) .. filename,'r')
     if file then
         local savefiledata = json.decode(file:read("*a"))
         file:close()
